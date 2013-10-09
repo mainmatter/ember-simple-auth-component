@@ -3,8 +3,5 @@
   "version": "0.0.1",
   "main": [
     "./ember-simple-auth.js"
-  ],
-  "dependencies": [
-    "ember"
   ]
 }
