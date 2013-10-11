@@ -1,4 +1,5 @@
-// Last commit: 98c7a9e (2013-10-08 22:23:34 +0200)
+// Version: 0.0.1-1-gc0fbc50
+// Last commit: c0fbc50 (2013-10-11 11:24:50 +0200)
 
 
 (function() {
@@ -85,7 +86,11 @@ Ember.SimpleAuth.LoginControllerMixin = Ember.Mixin.create({
       var data = this.getProperties('identification', 'password');
       if (!Ember.isEmpty(data.identification) && !Ember.isEmpty(data.password)) {
         var postData = JSON.stringify(self.serializeCredentials(data.identification, data.password));
-        Ember.$.post(Ember.SimpleAuth.serverSessionRoute, postData, null, 'json').then(function(response) {
+        Ember.$.ajax(Ember.SimpleAuth.serverSessionRoute, {
+          type:        'POST',
+          data:        postData,
+          contentType: 'application/json'
+        }).then(function(response) {
           self.get('session').setup(response);
           var attemptedTransition = self.get('session.attemptedTransition');
           if (attemptedTransition) {
@@ -110,10 +115,7 @@ Ember.SimpleAuth.LoginControllerMixin = Ember.Mixin.create({
 Ember.SimpleAuth.LogoutRouteMixin = Ember.Mixin.create({
   beforeModel: function() {
     var self = this;
-    Ember.$.ajax({
-      url:  Ember.SimpleAuth.serverSessionRoute,
-      type: 'DELETE'
-    }).always(function(response) {
+    Ember.$.ajax(Ember.SimpleAuth.serverSessionRoute, { type: 'DELETE' }).always(function(response) {
       self.get('session').destroy();
       self.transitionTo(Ember.SimpleAuth.routeAfterLogout);
     });
