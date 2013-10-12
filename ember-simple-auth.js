@@ -1,5 +1,5 @@
-// Version: 0.0.1-1-gc0fbc50
-// Last commit: c0fbc50 (2013-10-11 11:24:50 +0200)
+// Version: 0.0.2-6-g48729a9
+// Last commit: 48729a9 (2013-10-12 10:40:11 +0200)
 
 
 (function() {
@@ -20,7 +20,7 @@ Ember.SimpleAuth.setup = function(app, options) {
 
   Ember.$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
     if (!jqXHR.crossDomain && !Ember.isEmpty(session.get('authToken'))) {
-      jqXHR.setRequestHeader('X-AUTHENTICATION-TOKEN',  session.get('authToken'));
+      jqXHR.setRequestHeader('Authorization', 'Token token="' + session.get('authToken') + '"');
     }
   });
 };
