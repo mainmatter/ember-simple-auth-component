@@ -1,16 +1,16 @@
-// Version: 0.0.3-103-gd1cdf18
-// Last commit: d1cdf18 (2013-10-27 18:14:08 +0100)
+// Version: 0.0.4-10-g8780778
+// Last commit: 8780778 (2013-10-29 20:21:19 +0100)
 
 
 (function() {
 Ember.SimpleAuth = {};
 Ember.SimpleAuth.setup = function(container, application, options) {
   options = options || {};
-  this.routeAfterLogin  = options.routeAfterLogin || 'index';
-  this.routeAfterLogout = options.routeAfterLogout || 'index';
-  this.loginRoute       = options.loginRoute || 'login';
-  this.serverTokenRoute = options.serverTokenRoute || '/token';
-  this.autoRefreshToken = Ember.isEmpty(options.autoRefreshToken) ? true : !!options.autoRefreshToken;
+  this.routeAfterLogin     = options.routeAfterLogin || 'index';
+  this.routeAfterLogout    = options.routeAfterLogout || 'index';
+  this.loginRoute          = options.loginRoute || 'login';
+  this.serverTokenEndpoint = options.serverTokenEndpoint || '/token';
+  this.autoRefreshToken    = Ember.isEmpty(options.autoRefreshToken) ? true : !!options.autoRefreshToken;
 
   var session = Ember.SimpleAuth.Session.create();
   application.register('simple_auth:session', session, { instantiate: false, singleton: true });
@@ -101,7 +101,7 @@ Ember.SimpleAuth.Session = Ember.Object.extend({
       if (!Ember.isEmpty(this.get('refreshToken')) && waitTime > 0) {
         this.set('refreshAuthTokenTimeout', Ember.run.later(this, function() {
           var self = this;
-          Ember.$.ajax(Ember.SimpleAuth.serverTokenRoute, {
+          Ember.$.ajax(Ember.SimpleAuth.serverTokenEndpoint, {
             type:        'POST',
             data:        'grant_type=refresh_token&refresh_token=' + this.get('refreshToken'),
             contentType: 'application/x-www-form-urlencoded'
@@ -130,7 +130,11 @@ Ember.SimpleAuth.AuthenticatedRouteMixin = Ember.Mixin.create({
 
   triggerLogin: function(transition) {
     this.set('session.attemptedTransition', transition);
-    this.send('login');
+    if (Ember.canInvoke(transition, 'send')) {
+      transition.send('login');
+    } else {
+      this.send('login');
+    }
   }
 });
 
@@ -150,7 +154,7 @@ Ember.SimpleAuth.LoginControllerMixin = Ember.Mixin.create({
       var data = this.getProperties('identification', 'password');
       if (!Ember.isEmpty(data.identification) && !Ember.isEmpty(data.password)) {
         var requestOptions = this.tokenRequestOptions(data.identification, data.password);
-        Ember.$.ajax(Ember.SimpleAuth.serverTokenRoute, requestOptions).then(function(response) {
+        Ember.$.ajax(Ember.SimpleAuth.serverTokenEndpoint, requestOptions).then(function(response) {
           self.get('session').setup(response);
           self.send('loginSucceeded');
         }, function(xhr, status, error) {
