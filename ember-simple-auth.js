@@ -1,8 +1,10 @@
-// Version: 0.0.7
-// Last commit: 2327aef (2013-11-07 23:08:42 +0100)
+// Version: 0.0.8
+// Last commit: 2d29d20 (2013-11-14 19:53:50 +0100)
 
 
 (function() {
+'use strict';
+
 /**
   The main namespace for Ember.SimpleAuth
 
@@ -28,21 +30,23 @@ Ember.SimpleAuth = {};
   @method setup
   @static
   @param {Container} container The Ember.js container, see http://git.io/ed4U7Q
-  @param {Ember.Application} application The Ember.js application i`stance
+  @param {Ember.Application} application The Ember.js application instance
   @param {Object} [options]
     @param {String} [options.routeAfterLogin] route to redirect the user to after successfully logging in - defaults to `'index'`
     @param {String} [options.routeAfterLogout] route to redirect the user to after logging out - defaults to `'index'`
     @param {String} [options.loginRoute] route to redirect the user to when login is required - defaults to `'login'`
     @param {String} [options.serverTokenRoute] the server endpoint used to obtain the access token - defaults to `'/token'`
     @param {String} [options.autoRefreshToken] enable/disable automatic token refreshing (if the server supports it) - defaults to `true`
+    @param {Array[String]} [options.crossOriginWhitelist] list of origins that (besides the origin of the Ember.js application) send the authentication token to - defaults to `[]`
 **/
 Ember.SimpleAuth.setup = function(container, application, options) {
   options = options || {};
-  this.routeAfterLogin     = options.routeAfterLogin || 'index';
-  this.routeAfterLogout    = options.routeAfterLogout || 'index';
-  this.loginRoute          = options.loginRoute || 'login';
-  this.serverTokenEndpoint = options.serverTokenEndpoint || '/token';
-  this.autoRefreshToken    = Ember.isEmpty(options.autoRefreshToken) ? true : !!options.autoRefreshToken;
+  this.routeAfterLogin      = options.routeAfterLogin || 'index';
+  this.routeAfterLogout     = options.routeAfterLogout || 'index';
+  this.loginRoute           = options.loginRoute || 'login';
+  this.serverTokenEndpoint  = options.serverTokenEndpoint || '/token';
+  this.autoRefreshToken     = Ember.isEmpty(options.autoRefreshToken) ? true : !!options.autoRefreshToken;
+  this.crossOriginWhitelist = Ember.A(options.crossOriginWhitelist || []);
 
   var session = Ember.SimpleAuth.Session.create();
   application.register('simple_auth:session', session, { instantiate: false, singleton: true });
@@ -51,10 +55,25 @@ Ember.SimpleAuth.setup = function(container, application, options) {
   });
 
   Ember.$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-    if (!jqXHR.crossDomain && !Ember.isEmpty(session.get('authToken'))) {
+    if (!Ember.isEmpty(session.get('authToken')) && Ember.SimpleAuth.includeAuthorizationHeader(options.url)) {
       jqXHR.setRequestHeader('Authorization', 'Bearer ' + session.get('authToken'));
     }
   });
+
+  /**
+    @method includeAuthorizationHeader
+    @private
+  */
+  this.includeAuthorizationHeader = function(url) {
+    this._links = this._links || {};
+    var link = Ember.SimpleAuth._links[url] || function() {
+      var link = document.createElement('a');
+      link.href = url;
+      Ember.SimpleAuth._links[url] = link;
+      return link;
+    }();
+    return this.crossOriginWhitelist.indexOf(link.origin) > -1 || link.origin === window.location.origin;
+  },
 
   /**
     Call this method when an external login was successful. Typically you would
@@ -120,6 +139,8 @@ Ember.SimpleAuth.setup = function(container, application, options) {
 
 
 (function() {
+'use strict';
+
 /**
   This class holds the current access token and other session data. There will always be a
   session regardless of whether a user is currently authenticated or not. That (singleton) instance
@@ -202,8 +223,8 @@ Ember.SimpleAuth.Session = Ember.Object.extend({
       refreshToken:    this.load('refreshToken'),
       authTokenExpiry: this.load('authTokenExpiry')
     });
-    Ember.run.cancel(Ember.SimpleAuth.Session._syncPropertiesTimeout_);
-    Ember.SimpleAuth.Session._syncPropertiesTimeout_ = Ember.run.later(this, this.syncProperties, 500);
+    Ember.run.cancel(Ember.SimpleAuth.Session._syncPropertiesTimeout);
+    Ember.SimpleAuth.Session._syncPropertiesTimeout = Ember.run.later(this, this.syncProperties, 500);
   },
 
   /**
@@ -259,19 +280,19 @@ Ember.SimpleAuth.Session = Ember.Object.extend({
   */
   handleAuthTokenRefresh: function() {
     if (Ember.SimpleAuth.autoRefreshToken) {
-      Ember.run.cancel(Ember.SimpleAuth.Session._refreshTokenTimeout_);
-      Ember.SimpleAuth.Session._refreshTokenTimeout_ = undefined;
+      Ember.run.cancel(Ember.SimpleAuth.Session._refreshTokenTimeout);
+      Ember.SimpleAuth.Session._refreshTokenTimeout = undefined;
       var waitTime = this.get('authTokenExpiry') - 5000;
       if (!Ember.isEmpty(this.get('refreshToken')) && waitTime > 0) {
-        Ember.SimpleAuth.Session._refreshTokenTimeout_ = Ember.run.later(this, function() {
-          var self = this;
+        Ember.SimpleAuth.Session._refreshTokenTimeout = Ember.run.later(this, function() {
+          var _this = this;
           Ember.$.ajax(Ember.SimpleAuth.serverTokenEndpoint, {
             type:        'POST',
             data:        'grant_type=refresh_token&refresh_token=' + this.get('refreshToken'),
             contentType: 'application/x-www-form-urlencoded'
           }).then(function(response) {
-            self.setup(response);
-            self.handleAuthTokenRefresh();
+            _this.setup(response);
+            _this.handleAuthTokenRefresh();
           });
         }, waitTime);
       }
@@ -284,6 +305,8 @@ Ember.SimpleAuth.Session = Ember.Object.extend({
 
 
 (function() {
+'use strict';
+
 /**
   The mixin for routes that you want to enforce an authenticated user. When
   users hit a route that implements this mixin and have not authenticated
@@ -340,6 +363,8 @@ Ember.SimpleAuth.AuthenticatedRouteMixin = Ember.Mixin.create({
 
 
 (function() {
+'use strict';
+
 /**
   The mixin for the login controller (if you're using the default
   credentials-based login). This controller sends the user's credentials to the
@@ -398,15 +423,16 @@ Ember.SimpleAuth.LoginControllerMixin = Ember.Mixin.create({
       @private
     */
     login: function() {
-      var self = this;
+      var _this = this;
       var data = this.getProperties('identification', 'password');
       if (!Ember.isEmpty(data.identification) && !Ember.isEmpty(data.password)) {
+        this.set('password', undefined);
         var requestOptions = this.tokenRequestOptions(data.identification, data.password);
         Ember.$.ajax(Ember.SimpleAuth.serverTokenEndpoint, requestOptions).then(function(response) {
-          self.get('session').setup(response);
-          self.send('loginSucceeded');
+          _this.get('session').setup(response);
+          _this.send('loginSucceeded');
         }, function(xhr, status, error) {
-          self.send('loginFailed', xhr, status, error);
+          _this.send('loginFailed', xhr, status, error);
         });
       }
     }
@@ -418,6 +444,8 @@ Ember.SimpleAuth.LoginControllerMixin = Ember.Mixin.create({
 
 
 (function() {
+'use strict';
+
 /**
   The mixin for the application controller. This defines the `login` and
   `logout` actions so that you can simply add buttons or links in every template
