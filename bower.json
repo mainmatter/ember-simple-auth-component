@@ -2,6 +2,9 @@
   "name": "ember-simple-auth",
   "version": "0.3.0",
   "main": [
-    "./ember-simple-auth.js"
+    "./ember-simple-auth.js",
+    "./ember-simple-auth-cookie-store.js",
+    "./ember-simple-auth-devise.js",
+    "./ember-simple-auth-oauth2.js"
   ]
 }
