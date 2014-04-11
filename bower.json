@@ -6,5 +6,8 @@
     "./ember-simple-auth-cookie-store.js",
     "./ember-simple-auth-devise.js",
     "./ember-simple-auth-oauth2.js"
-  ]
+  ],
+  "dependencies": {
+    "ember": "*"
+  }
 }
