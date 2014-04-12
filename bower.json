@@ -8,6 +8,6 @@
     "./ember-simple-auth-oauth2.js"
   ],
   "dependencies": {
-    "ember": "*"
+    "ember": ">=1.2"
   }
 }
