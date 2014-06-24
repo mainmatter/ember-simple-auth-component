@@ -1,11 +1,15 @@
 {
   "name": "ember-simple-auth",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "main": [
-    "./ember-simple-auth.js",
-    "./ember-simple-auth-cookie-store.js",
-    "./ember-simple-auth-devise.js",
-    "./ember-simple-auth-oauth2.js"
+    "./simple-auth.js",
+    "./simple-auth.amd.js",
+    "./simple-auth-cookie-store.js",
+    "./simple-auth-cookie-store.amd.js",
+    "./simple-auth-devise.js",
+    "./simple-auth-devise.amd.js",
+    "./simple-auth-oauth2.js",
+    "./simple-auth-oauth2.amd.js"
   ],
   "dependencies": {
     "ember": ">=1.2"
