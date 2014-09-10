@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth Cookie Store', '0.6.4');
+Ember.libraries.register('Ember Simple Auth Cookie Store', '0.6.5');
 
 define("simple-auth-cookie-store/ember", 
   ["./initializer"],
@@ -195,9 +195,10 @@ define("simple-auth-cookie-store/stores/cookie",
         @private
       */
       write: function(value, expiration) {
+        var path = '; path=/';
         var expires = Ember.isEmpty(expiration) ? '' : '; expires=' + new Date(expiration).toUTCString();
         var secure  = !!this._secureCookies ? ';secure' : '';
-        document.cookie = this.cookieName + '=' + encodeURIComponent(value) + expires + secure;
+        document.cookie = this.cookieName + '=' + encodeURIComponent(value) + path + expires + secure;
       },
 
       /**

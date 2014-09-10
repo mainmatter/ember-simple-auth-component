@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth Devise', '0.6.4');
+Ember.libraries.register('Ember Simple Auth Devise', '0.6.5');
 
 define("simple-auth-devise/authenticators/devise", 
   ["simple-auth/authenticators/base","simple-auth/utils/is-secure-url","simple-auth/utils/get-global-config","exports"],

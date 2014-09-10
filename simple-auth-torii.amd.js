@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth Torii', '0.6.4');
+Ember.libraries.register('Ember Simple Auth Torii', '0.6.5');
 
 define("simple-auth-torii/authenticators/torii", 
   ["simple-auth/authenticators/base","exports"],
