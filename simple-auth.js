@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth', '0.6.5');
+Ember.libraries.register('Ember Simple Auth', '0.6.6');
 
 var define, requireModule;
 
@@ -1616,5 +1616,5 @@ global.SimpleAuth = {
 
 requireModule('simple-auth/ember');
 
-Ember.libraries.register('Ember Simple Auth', '0.6.5');
+Ember.libraries.register('Ember Simple Auth', '0.6.6');
 })((typeof global !== 'undefined') ? global : window);
