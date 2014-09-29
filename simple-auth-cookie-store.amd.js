@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth Cookie Store', '0.6.6');
+Ember.libraries.register('Ember Simple Auth Cookie Store', '0.6.7');
 
 define("simple-auth-cookie-store/configuration", 
   ["simple-auth/utils/load-config","exports"],
