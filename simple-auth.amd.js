@@ -34,7 +34,7 @@ define("simple-auth/authenticators/base",
       __Custom authenticators have to be registered with Ember's dependency
       injection container__ so that the session can retrieve an instance, e.g.:
 
-      ```javascript
+      ```js
       import Base from 'simple-auth/authenticators/base';
 
       var CustomAuthenticator = Base.extend({
@@ -49,7 +49,7 @@ define("simple-auth/authenticators/base",
       });
       ```
 
-      ```javascript
+      ```js
       // app/controllers/login.js
       import AuthenticationControllerMixin from 'simple-auth/mixins/authentication-controller-mixin';
 
@@ -210,10 +210,10 @@ define("simple-auth/authorizers/base",
     });
   });
 define("simple-auth/configuration", 
-  ["./utils/get-config","exports"],
+  ["simple-auth/utils/load-config","exports"],
   function(__dependency1__, __exports__) {
     "use strict";
-    var getConfig = __dependency1__["default"];
+    var loadConfig = __dependency1__["default"];
 
     var defaults = {
       authenticationRoute:         'login',
@@ -233,7 +233,7 @@ define("simple-auth/configuration",
       To change any of these values, define a global environment object for Ember
       Simple Auth and define the values there:
 
-      ```javascript
+      ```js
       window.ENV = window.ENV || {};
       window.ENV['simple-auth'] = {
         authenticationRoute: 'sign-in'
@@ -357,18 +357,9 @@ define("simple-auth/configuration",
         @method load
         @private
       */
-      load: function(container) {
-        var config                       = getConfig('simple-auth');
-        this.authenticationRoute         = config.authenticationRoute || defaults.authenticationRoute;
-        this.routeAfterAuthentication    = config.routeAfterAuthentication || defaults.routeAfterAuthentication;
-        this.routeIfAlreadyAuthenticated = config.routeIfAlreadyAuthenticated || defaults.routeIfAlreadyAuthenticated;
-        this.sessionPropertyName         = config.sessionPropertyName || defaults.sessionPropertyName;
-        this.authorizer                  = config.authorizer || defaults.authorizer;
-        this.session                     = config.session || defaults.session;
-        this.store                       = config.store || defaults.store;
-        this.crossOriginWhitelist        = config.crossOriginWhitelist || defaults.crossOriginWhitelist;
-        this.applicationRootUrl          = container.lookup('router:main').get('rootURL') || '/';
-      }
+      load: loadConfig(defaults, function(container, config) {
+        this.applicationRootUrl = container.lookup('router:main').get('rootURL') || '/';
+      })
     };
   });
 define("simple-auth/ember", 
@@ -382,14 +373,18 @@ define("simple-auth/ember",
     });
   });
 define("simple-auth/initializer", 
-  ["./setup","exports"],
-  function(__dependency1__, __exports__) {
+  ["./configuration","./utils/get-global-config","./setup","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
     "use strict";
-    var setup = __dependency1__["default"];
+    var Configuration = __dependency1__["default"];
+    var getGlobalConfig = __dependency2__["default"];
+    var setup = __dependency3__["default"];
 
     __exports__["default"] = {
       name:       'simple-auth',
       initialize: function(container, application) {
+        var config = getGlobalConfig('simple-auth');
+        Configuration.load(container, config);
         setup(container, application);
       }
     };
@@ -435,7 +430,7 @@ define("simple-auth/mixins/application-route-mixin",
       be automatically translated into route actions but would have to be handled
       inidivially, e.g. in an initializer:
 
-      ```javascript
+      ```js
       Ember.Application.initializer({
         name:       'authentication',
         after:      'simple-auth',
@@ -495,7 +490,7 @@ define("simple-auth/mixins/application-route-mixin",
           because it opens a new window to handle authentication there), this is
           the action to override, e.g.:__
 
-          ```javascript
+          ```js
           App.ApplicationRoute = Ember.Route.extend(SimpleAuth.ApplicationRouteMixin, {
             actions: {
               authenticateSession: function() {
@@ -540,7 +535,7 @@ define("simple-auth/mixins/application-route-mixin",
 
           It can be overridden to display error messages etc.:
 
-          ```javascript
+          ```js
           App.ApplicationRoute = Ember.Route.extend(SimpleAuth.ApplicationRouteMixin, {
             actions: {
               sessionAuthenticationFailed: function(error) {
@@ -622,7 +617,7 @@ define("simple-auth/mixins/authenticated-route-mixin",
       [`Configuration.authenticationRoute`](#SimpleAuth-Configuration-authenticationRoute)
       if it is not.
 
-      ```javascript
+      ```js
       // app/routes/protected.js
       import AuthenticatedRouteMixin from 'simple-auth/mixins/authenticated-route-mixin';
 
@@ -785,7 +780,7 @@ define("simple-auth/mixins/unauthenticated-route-mixin",
       [`Configuration.routeIfAlreadyAuthenticated`](#SimpleAuth-Configuration-routeIfAlreadyAuthenticated),
       which defaults to `'index'`.
 
-      ```javascript
+      ```js
       // app/routes/login.js
       import UnauthenticatedRouteMixin from 'simple-auth/mixins/unauthenticated-route-mixin';
 
@@ -845,7 +840,7 @@ define("simple-auth/session",
       method with the authenticator factory to use as well as any options the
       authenticator needs to authenticate the session:
 
-      ```javascript
+      ```js
       this.get('session').authenticate('authenticator:custom', { some: 'option' }).then(function() {
         // authentication was successful
       }, function() {
@@ -1206,7 +1201,6 @@ define("simple-auth/setup",
       @private
     **/
     __exports__["default"] = function(container, application) {
-      Configuration.load(container);
       application.deferReadiness();
       registerFactories(container);
 
@@ -1385,12 +1379,12 @@ define("simple-auth/stores/ephemeral",
     });
   });
 define("simple-auth/stores/local-storage", 
-  ["./base","../utils/flat-objects-are-equal","simple-auth/utils/get-config","exports"],
+  ["./base","../utils/flat-objects-are-equal","simple-auth/utils/get-global-config","exports"],
   function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
     "use strict";
     var Base = __dependency1__["default"];
     var flatObjectsAreEqual = __dependency2__["default"];
-    var getConfig = __dependency3__["default"];
+    var getGlobalConfig = __dependency3__["default"];
 
     /**
       Store that saves its data in the browser's `localStorage`.
@@ -1420,8 +1414,8 @@ define("simple-auth/stores/local-storage",
         @private
       */
       init: function() {
-        var config = getConfig('simple-auth');
-        this.key   = config.localStorageKey || this.key;
+        var globalConfig = getGlobalConfig('simple-auth');
+        this.key         = globalConfig.localStorageKey || this.key;
 
         this.bindToStorageEvents();
       },
@@ -1504,7 +1498,7 @@ define("simple-auth/utils/flat-objects-are-equal",
       return JSON.stringify(sortObject(a)) === JSON.stringify(sortObject(b));
     }
   });
-define("simple-auth/utils/get-config", 
+define("simple-auth/utils/get-global-config", 
   ["exports"],
   function(__exports__) {
     "use strict";
@@ -1527,6 +1521,24 @@ define("simple-auth/utils/is-secure-url",
       link.href = url;
       link.href = link.href;
       return link.protocol == 'https:';
+    }
+  });
+define("simple-auth/utils/load-config", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    __exports__["default"] = function(defaults, callback) {
+      return function(container, config) {
+        var wrappedConfig = Ember.Object.create(config);
+        for (var property in this) {
+          if (this.hasOwnProperty(property) && Ember.typeOf(this[property]) !== 'function') {
+            this[property] = wrappedConfig.getWithDefault(property, defaults[property]);
+          }
+        }
+        if (callback) {
+          callback.apply(this, [container, config]);
+        }
+      };
     }
   });
 })((typeof global !== 'undefined') ? global : window);

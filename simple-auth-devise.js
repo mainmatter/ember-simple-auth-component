@@ -57,12 +57,12 @@ var define, requireModule;
 })();
 
 define("simple-auth-devise/authenticators/devise", 
-  ["simple-auth/authenticators/base","simple-auth/utils/is-secure-url","simple-auth/utils/get-config","exports"],
+  ["simple-auth/authenticators/base","simple-auth/utils/is-secure-url","./../configuration","exports"],
   function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
     "use strict";
     var Base = __dependency1__["default"];
     var isSecureUrl = __dependency2__["default"];
-    var getConfig = __dependency3__["default"];
+    var Configuration = __dependency3__["default"];
 
     /**
       Authenticator that works with the Ruby gem
@@ -86,14 +86,8 @@ define("simple-auth-devise/authenticators/devise",
         The endpoint on the server the authenticator acquires the auth token
         and email from.
 
-        This value can be configured via the global environment object:
-
-        ```js
-        window.ENV = window.ENV || {};
-        window.ENV['simple-auth-devise'] = {
-          serverTokenEndpoint: '/some/other/endpoint'
-        }
-        ```
+        This value can be configured via
+        [`SimpleAuth.Configuration.Devise#serverTokenEndpoint`](#SimpleAuth-Configuration-Devise-serverTokenEndpoint).
 
         @property serverTokenEndpoint
         @type String
@@ -104,14 +98,8 @@ define("simple-auth-devise/authenticators/devise",
       /**
         The devise resource name
 
-        This value can be configured via the global environment object:
-
-        ```js
-        window.ENV = window.ENV || {};
-        window.ENV['simple-auth-devise'] = {
-          resourceName: 'account'
-        }
-        ```
+        This value can be configured via
+        [`SimpleAuth.Configuration.Devise#resourceName`](#SimpleAuth-Configuration-Devise-resourceName).
 
         @property resourceName
         @type String
@@ -124,9 +112,8 @@ define("simple-auth-devise/authenticators/devise",
         @private
       */
       init: function() {
-        var config               = getConfig('simple-auth-devise');
-        this.serverTokenEndpoint = config.serverTokenEndpoint || this.serverTokenEndpoint;
-        this.resourceName        = config.resourceName || this.resourceName;
+        this.serverTokenEndpoint = Configuration.serverTokenEndpoint;
+        this.resourceName        = Configuration.resourceName;
       },
 
       /**
@@ -262,6 +249,65 @@ define("simple-auth-devise/authorizers/devise",
       }
     });
   });
+define("simple-auth-devise/configuration", 
+  ["simple-auth/utils/load-config","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    var loadConfig = __dependency1__["default"];
+
+    var defaults = {
+      serverTokenEndpoint: '/users/sign_in',
+      resourceName:        'user'
+    };
+
+    /**
+      Ember Simple Auth Device's configuration object.
+
+      To change any of these values, define a global environment object for Ember
+      Simple Auth and define the values there:
+
+      ```js
+      window.ENV = window.ENV || {};
+      window.ENV['simple-auth-devise'] = {
+        serverTokenEndpoint: '/some/other/endpoint'
+      }
+      ```
+
+      @class Devise
+      @namespace SimpleAuth.Configuration
+      @module simple-auth/configuration
+    */
+    __exports__["default"] = {
+      /**
+        The endpoint on the server the authenticator acquires the auth token
+        and email from.
+
+        @property serverTokenEndpoint
+        @readOnly
+        @static
+        @type String
+        @default '/users/sign_in'
+      */
+      serverTokenEndpoint: defaults.serverTokenEndpoint,
+
+      /**
+        The devise resource name.
+
+        @property resourceName
+        @readOnly
+        @static
+        @type String
+        @default 'user'
+      */
+      resourceName: defaults.resourceName,
+
+      /**
+        @method load
+        @private
+      */
+      load: loadConfig(defaults)
+    };
+  });
 define("simple-auth-devise/ember", 
   ["./initializer"],
   function(__dependency1__) {
@@ -273,16 +319,20 @@ define("simple-auth-devise/ember",
     });
   });
 define("simple-auth-devise/initializer", 
-  ["simple-auth-devise/authenticators/devise","simple-auth-devise/authorizers/devise","exports"],
-  function(__dependency1__, __dependency2__, __exports__) {
+  ["./configuration","simple-auth/utils/get-global-config","simple-auth-devise/authenticators/devise","simple-auth-devise/authorizers/devise","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __exports__) {
     "use strict";
-    var Authenticator = __dependency1__["default"];
-    var Authorizer = __dependency2__["default"];
+    var Configuration = __dependency1__["default"];
+    var getGlobalConfig = __dependency2__["default"];
+    var Authenticator = __dependency3__["default"];
+    var Authorizer = __dependency4__["default"];
 
     __exports__["default"] = {
       name:       'simple-auth-devise',
       before:     'simple-auth',
       initialize: function(container, application) {
+        var config = getGlobalConfig('simple-auth-devise');
+        Configuration.load(container, config);
         container.register('simple-auth-authorizer:devise', Authorizer);
         container.register('simple-auth-authenticator:devise', Authenticator);
       }
@@ -297,14 +347,19 @@ define('simple-auth/authorizers/base',  ['exports'], function(__exports__) {
 define('simple-auth/utils/is-secure-url',  ['exports'], function(__exports__) {
   __exports__['default'] = global.SimpleAuth.Utils.isSecureUrl;
 });
-define('simple-auth/utils/get-config',  ['exports'], function(__exports__) {
-  __exports__['default'] = global.SimpleAuth.Utils.getConfig;
+define('simple-auth/utils/get-global-config',  ['exports'], function(__exports__) {
+  __exports__['default'] = global.SimpleAuth.Utils.getGlobalConfig;
+});
+define('simple-auth/utils/load-config',  ['exports'], function(__exports__) {
+  __exports__['default'] = global.SimpleAuth.Utils.loadConfig;
 });
 
 var initializer   = requireModule('simple-auth-devise/initializer')['default'];
+var Configuration = requireModule('simple-auth-devise/configuration')['default'];
 var Authenticator = requireModule('simple-auth-devise/authenticators/devise')['default'];
 var Authorizer    = requireModule('simple-auth-devise/authorizers/devise')['default'];
 
+global.SimpleAuth.Configuration.Devise  = Configuration;
 global.SimpleAuth.Authenticators.Devise = Authenticator;
 global.SimpleAuth.Authorizers.Devise    = Authorizer;
 
