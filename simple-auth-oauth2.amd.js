@@ -9,12 +9,12 @@
 Ember.libraries.register('Ember Simple Auth OAuth 2.0', '0.6.6');
 
 define("simple-auth-oauth2/authenticators/oauth2", 
-  ["simple-auth/authenticators/base","simple-auth/utils/is-secure-url","simple-auth/utils/get-global-config","exports"],
+  ["simple-auth/authenticators/base","simple-auth/utils/is-secure-url","simple-auth/utils/get-config","exports"],
   function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
     "use strict";
     var Base = __dependency1__["default"];
     var isSecureUrl = __dependency2__["default"];
-    var getGlobalConfig = __dependency3__["default"];
+    var getConfig = __dependency3__["default"];
 
     /**
       Authenticator that conforms to OAuth 2
@@ -109,10 +109,10 @@ define("simple-auth-oauth2/authenticators/oauth2",
         @private
       */
       init: function() {
-        var globalConfig                   = getGlobalConfig('simple-auth-oauth2');
-        this.serverTokenEndpoint           = globalConfig.serverTokenEndpoint || this.serverTokenEndpoint;
-        this.serverTokenRevocationEndpoint = globalConfig.serverTokenRevocationEndpoint || this.serverTokenRevocationEndpoint;
-        this.refreshAccessTokens           = globalConfig.refreshAccessTokens || this.refreshAccessTokens;
+        var config                         = getConfig('simple-auth-oauth2');
+        this.serverTokenEndpoint           = config.serverTokenEndpoint || this.serverTokenEndpoint;
+        this.serverTokenRevocationEndpoint = config.serverTokenRevocationEndpoint || this.serverTokenRevocationEndpoint;
+        this.refreshAccessTokens           = config.refreshAccessTokens || this.refreshAccessTokens;
       },
 
       /**

@@ -33,12 +33,12 @@ define("simple-auth-cookie-store/initializer",
     };
   });
 define("simple-auth-cookie-store/stores/cookie", 
-  ["simple-auth/stores/base","simple-auth/utils/flat-objects-are-equal","simple-auth/utils/get-global-config","exports"],
+  ["simple-auth/stores/base","simple-auth/utils/flat-objects-are-equal","simple-auth/utils/get-config","exports"],
   function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
     "use strict";
     var Base = __dependency1__["default"];
     var flatObjectsAreEqual = __dependency2__["default"];
-    var getGlobalConfig = __dependency3__["default"];
+    var getConfig = __dependency3__["default"];
 
     /**
       Store that saves its data in a cookie.
@@ -135,9 +135,9 @@ define("simple-auth-cookie-store/stores/cookie",
         @private
       */
       init: function() {
-        var globalConfig          = getGlobalConfig('simple-auth-cookie-store');
-        this.cookieName           = globalConfig.cookieName || this.cookieName;
-        this.cookieExpirationTime = globalConfig.cookieExpirationTime || this.cookieExpirationTime;
+        var config                = getConfig('simple-auth-cookie-store');
+        this.cookieName           = config.cookieName || this.cookieName;
+        this.cookieExpirationTime = config.cookieExpirationTime || this.cookieExpirationTime;
         this.syncData();
       },
 

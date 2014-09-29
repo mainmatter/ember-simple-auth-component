@@ -210,10 +210,22 @@ define("simple-auth/authorizers/base",
     });
   });
 define("simple-auth/configuration", 
-  ["./utils/get-global-config","exports"],
+  ["./utils/get-config","exports"],
   function(__dependency1__, __exports__) {
     "use strict";
-    var getGlobalConfig = __dependency1__["default"];
+    var getConfig = __dependency1__["default"];
+
+    var defaults = {
+      authenticationRoute:         'login',
+      routeAfterAuthentication:    'index',
+      routeIfAlreadyAuthenticated: 'index',
+      sessionPropertyName:         'session',
+      authorizer:                  null,
+      session:                     'simple-auth-session:main',
+      store:                       'simple-auth-session-store:local-storage',
+      crossOriginWhitelist:        [],
+      applicationRootUrl:          null
+    };
 
     /**
       Ember Simple Auth's configuration object.
@@ -242,7 +254,7 @@ define("simple-auth/configuration",
         @type String
         @default 'login'
       */
-      authenticationRoute: 'login',
+      authenticationRoute: defaults.authenticationRoute,
 
       /**
         The route to transition to after successful authentication.
@@ -253,7 +265,7 @@ define("simple-auth/configuration",
         @type String
         @default 'index'
       */
-      routeAfterAuthentication: 'index',
+      routeAfterAuthentication: defaults.routeAfterAuthentication,
 
       /**
         The route to transition to if a route that implements
@@ -266,7 +278,7 @@ define("simple-auth/configuration",
         @type String
         @default 'index'
       */
-      routeIfAlreadyAuthenticated: 'index',
+      routeIfAlreadyAuthenticated: defaults.routeIfAlreadyAuthenticated,
 
       /**
         The name of the property that the session is injected with into routes and
@@ -278,7 +290,7 @@ define("simple-auth/configuration",
         @type String
         @default 'session'
       */
-      sessionPropertyName: 'session',
+      sessionPropertyName: defaults.sessionPropertyName,
 
       /**
         The authorizer factory to use as it is registered with Ember's container,
@@ -293,7 +305,7 @@ define("simple-auth/configuration",
         @type String
         @default null
       */
-      authorizer: null,
+      authorizer: defaults.authorizer,
 
       /**
         The session factory to use as it is registered with Ember's container,
@@ -306,7 +318,7 @@ define("simple-auth/configuration",
         @type String
         @default 'simple-auth-session:main'
       */
-      session: 'simple-auth-session:main',
+      session: defaults.session,
 
       /**
         The store factory to use as it is registered with Ember's container, see
@@ -318,7 +330,7 @@ define("simple-auth/configuration",
         @type String
         @default simple-auth-session-store:local-storage
       */
-      store: 'simple-auth-session-store:local-storage',
+      store: defaults.store,
 
       /**
         Ember Simple Auth will never authorize requests going to a different origin
@@ -333,29 +345,29 @@ define("simple-auth/configuration",
         @type Array
         @default []
       */
-      crossOriginWhitelist: [],
+      crossOriginWhitelist: defaults.crossOriginWhitelist,
 
       /**
         @property applicationRootUrl
         @private
       */
-      applicationRootUrl: null,
+      applicationRootUrl: defaults.applicationRootUrl,
 
       /**
         @method load
         @private
       */
       load: function(container) {
-        var globalConfig              = getGlobalConfig('simple-auth');
-        this.authenticationRoute      = globalConfig.authenticationRoute || this.authenticationRoute;
-        this.routeAfterAuthentication = globalConfig.routeAfterAuthentication || this.routeAfterAuthentication;
-        this.routeIfAlreadyAuthenticated     = globalConfig.routeIfAlreadyAuthenticated || this.routeIfAlreadyAuthenticated;
-        this.sessionPropertyName      = globalConfig.sessionPropertyName || this.sessionPropertyName;
-        this.authorizer               = globalConfig.authorizer || this.authorizer;
-        this.session                  = globalConfig.session || this.session;
-        this.store                    = globalConfig.store || this.store;
-        this.crossOriginWhitelist     = globalConfig.crossOriginWhitelist || this.crossOriginWhitelist;
-        this.applicationRootUrl       = container.lookup('router:main').get('rootURL') || '/';
+        var config                       = getConfig('simple-auth');
+        this.authenticationRoute         = config.authenticationRoute || defaults.authenticationRoute;
+        this.routeAfterAuthentication    = config.routeAfterAuthentication || defaults.routeAfterAuthentication;
+        this.routeIfAlreadyAuthenticated = config.routeIfAlreadyAuthenticated || defaults.routeIfAlreadyAuthenticated;
+        this.sessionPropertyName         = config.sessionPropertyName || defaults.sessionPropertyName;
+        this.authorizer                  = config.authorizer || defaults.authorizer;
+        this.session                     = config.session || defaults.session;
+        this.store                       = config.store || defaults.store;
+        this.crossOriginWhitelist        = config.crossOriginWhitelist || defaults.crossOriginWhitelist;
+        this.applicationRootUrl          = container.lookup('router:main').get('rootURL') || '/';
       }
     };
   });
@@ -1373,12 +1385,12 @@ define("simple-auth/stores/ephemeral",
     });
   });
 define("simple-auth/stores/local-storage", 
-  ["./base","../utils/flat-objects-are-equal","simple-auth/utils/get-global-config","exports"],
+  ["./base","../utils/flat-objects-are-equal","simple-auth/utils/get-config","exports"],
   function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
     "use strict";
     var Base = __dependency1__["default"];
     var flatObjectsAreEqual = __dependency2__["default"];
-    var getGlobalConfig = __dependency3__["default"];
+    var getConfig = __dependency3__["default"];
 
     /**
       Store that saves its data in the browser's `localStorage`.
@@ -1408,8 +1420,8 @@ define("simple-auth/stores/local-storage",
         @private
       */
       init: function() {
-        var globalConfig = getGlobalConfig('simple-auth');
-        this.key         = globalConfig.localStorageKey || this.key;
+        var config = getConfig('simple-auth');
+        this.key   = config.localStorageKey || this.key;
 
         this.bindToStorageEvents();
       },
@@ -1492,14 +1504,14 @@ define("simple-auth/utils/flat-objects-are-equal",
       return JSON.stringify(sortObject(a)) === JSON.stringify(sortObject(b));
     }
   });
-define("simple-auth/utils/get-global-config", 
+define("simple-auth/utils/get-config", 
   ["exports"],
   function(__exports__) {
     "use strict";
     var global = (typeof window !== 'undefined') ? window : {};
 
     __exports__["default"] = function(scope) {
-      return(global.ENV || {})[scope] || {};
+      return Ember.get(global, 'ENV.' + scope) || {};
     }
   });
 define("simple-auth/utils/is-secure-url", 

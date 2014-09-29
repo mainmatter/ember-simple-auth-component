@@ -9,12 +9,12 @@
 Ember.libraries.register('Ember Simple Auth Devise', '0.6.6');
 
 define("simple-auth-devise/authenticators/devise", 
-  ["simple-auth/authenticators/base","simple-auth/utils/is-secure-url","simple-auth/utils/get-global-config","exports"],
+  ["simple-auth/authenticators/base","simple-auth/utils/is-secure-url","simple-auth/utils/get-config","exports"],
   function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
     "use strict";
     var Base = __dependency1__["default"];
     var isSecureUrl = __dependency2__["default"];
-    var getGlobalConfig = __dependency3__["default"];
+    var getConfig = __dependency3__["default"];
 
     /**
       Authenticator that works with the Ruby gem
@@ -76,9 +76,9 @@ define("simple-auth-devise/authenticators/devise",
         @private
       */
       init: function() {
-        var globalConfig         = getGlobalConfig('simple-auth-devise');
-        this.serverTokenEndpoint = globalConfig.serverTokenEndpoint || this.serverTokenEndpoint;
-        this.resourceName        = globalConfig.resourceName || this.resourceName;
+        var config               = getConfig('simple-auth-devise');
+        this.serverTokenEndpoint = config.serverTokenEndpoint || this.serverTokenEndpoint;
+        this.resourceName        = config.resourceName || this.resourceName;
       },
 
       /**
