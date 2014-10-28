@@ -139,4 +139,4 @@ define("simple-auth-torii/initializer",
       }
     };
   });
-})((typeof global !== 'undefined') ? global : window);
+})(this);

@@ -145,11 +145,11 @@ define("simple-auth-cookie-store/initializer",
     };
   });
 define("simple-auth-cookie-store/stores/cookie", 
-  ["simple-auth/stores/base","simple-auth/utils/flat-objects-are-equal","./../configuration","exports"],
+  ["simple-auth/stores/base","simple-auth/utils/objects-are-equal","./../configuration","exports"],
   function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
     "use strict";
     var Base = __dependency1__["default"];
-    var flatObjectsAreEqual = __dependency2__["default"];
+    var objectsAreEqual = __dependency2__["default"];
     var Configuration = __dependency3__["default"];
 
     /**
@@ -307,7 +307,7 @@ define("simple-auth-cookie-store/stores/cookie",
       */
       syncData: function() {
         var data = this.restore();
-        if (!flatObjectsAreEqual(data, this._lastData)) {
+        if (!objectsAreEqual(data, this._lastData)) {
           this._lastData = data;
           this.trigger('sessionDataUpdated', data);
         }
@@ -321,8 +321,8 @@ define("simple-auth-cookie-store/stores/cookie",
 define('simple-auth/stores/base',  ['exports'], function(__exports__) {
   __exports__['default'] = global.SimpleAuth.Stores.Base;
 });
-define('simple-auth/utils/flat-objects-are-equal',  ['exports'], function(__exports__) {
-  __exports__['default'] = global.SimpleAuth.Utils.flatObjectsAreEqual;
+define('simple-auth/utils/objects-are-equal',  ['exports'], function(__exports__) {
+  __exports__['default'] = global.SimpleAuth.Utils.objectsAreEqual;
 });
 define('simple-auth/utils/get-global-config',  ['exports'], function(__exports__) {
   __exports__['default'] = global.SimpleAuth.Utils.getGlobalConfig;

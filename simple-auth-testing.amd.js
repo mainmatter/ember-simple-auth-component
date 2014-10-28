@@ -76,4 +76,4 @@ define("simple-auth-testing/test-helpers",
 
     __exports__["default"] = testHelpers;
   });
-})((typeof global !== 'undefined') ? global : window);
+})(this);

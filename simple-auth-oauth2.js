@@ -57,12 +57,11 @@ var define, requireModule;
 })();
 
 define("simple-auth-oauth2/authenticators/oauth2", 
-  ["simple-auth/authenticators/base","simple-auth/utils/is-secure-url","./../configuration","exports"],
-  function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
+  ["simple-auth/authenticators/base","./../configuration","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
     "use strict";
     var Base = __dependency1__["default"];
-    var isSecureUrl = __dependency2__["default"];
-    var Configuration = __dependency3__["default"];
+    var Configuration = __dependency2__["default"];
 
     /**
       Authenticator that conforms to OAuth 2
@@ -271,9 +270,6 @@ define("simple-auth-oauth2/authenticators/oauth2",
         @protected
       */
       makeRequest: function(url, data) {
-        if (!isSecureUrl(url)) {
-          Ember.Logger.warn('Credentials are transmitted via an insecure connection - use HTTPS to keep them secure.');
-        }
         return Ember.$.ajax({
           url:         url,
           type:        'POST',
@@ -342,11 +338,10 @@ define("simple-auth-oauth2/authenticators/oauth2",
     });
   });
 define("simple-auth-oauth2/authorizers/oauth2", 
-  ["simple-auth/authorizers/base","simple-auth/utils/is-secure-url","exports"],
-  function(__dependency1__, __dependency2__, __exports__) {
+  ["simple-auth/authorizers/base","exports"],
+  function(__dependency1__, __exports__) {
     "use strict";
     var Base = __dependency1__["default"];
-    var isSecureUrl = __dependency2__["default"];
 
     /**
       Authorizer that conforms to OAuth 2
@@ -378,9 +373,6 @@ define("simple-auth-oauth2/authorizers/oauth2",
       authorize: function(jqXHR, requestOptions) {
         var accessToken = this.get('session.access_token');
         if (this.get('session.isAuthenticated') && !Ember.isEmpty(accessToken)) {
-          if (!isSecureUrl(requestOptions.url)) {
-            Ember.Logger.warn('Credentials are transmitted via an insecure connection - use HTTPS to keep them secure.');
-          }
           jqXHR.setRequestHeader('Authorization', 'Bearer ' + accessToken);
         }
       }
@@ -493,9 +485,6 @@ define('simple-auth/authenticators/base',  ['exports'], function(__exports__) {
 });
 define('simple-auth/authorizers/base',  ['exports'], function(__exports__) {
   __exports__['default'] = global.SimpleAuth.Authorizers.Base;
-});
-define('simple-auth/utils/is-secure-url',  ['exports'], function(__exports__) {
-  __exports__['default'] = global.SimpleAuth.Utils.isSecureUrl;
 });
 define('simple-auth/utils/get-global-config',  ['exports'], function(__exports__) {
   __exports__['default'] = global.SimpleAuth.Utils.getGlobalConfig;
