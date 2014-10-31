@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth Devise', '0.6.7');
+Ember.libraries.register('Ember Simple Auth Devise', '0.7.0');
 
 define("simple-auth-devise/authenticators/devise", 
   ["simple-auth/authenticators/base","./../configuration","exports"],
@@ -271,12 +271,11 @@ define("simple-auth-devise/configuration",
     /**
       Ember Simple Auth Device's configuration object.
 
-      To change any of these values, define a global environment object for Ember
-      Simple Auth and define the values there:
+      To change any of these values, set them on the application's environment
+      object:
 
       ```js
-      window.ENV = window.ENV || {};
-      window.ENV['simple-auth-devise'] = {
+      ENV['simple-auth-devise'] = {
         serverTokenEndpoint: '/some/other/endpoint'
       }
       ```

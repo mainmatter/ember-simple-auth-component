@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth Cookie Store', '0.6.7');
+Ember.libraries.register('Ember Simple Auth Cookie Store', '0.7.0');
 
 define("simple-auth-cookie-store/configuration", 
   ["simple-auth/utils/load-config","exports"],
@@ -16,18 +16,18 @@ define("simple-auth-cookie-store/configuration",
 
     var defaults = {
       cookieName:           'ember_simple_auth:session',
+      cookieDomain:         null,
       cookieExpirationTime: null
     };
 
     /**
       Ember Simple Auth Cookie Store's configuration object.
 
-      To change any of these values, define a global environment object for Ember
-      Simple Auth and define the values there:
+      To change any of these values, set them on the application's environment
+      object:
 
       ```js
-      window.ENV = window.ENV || {};
-      window.ENV['simple-auth-cookie-store'] = {
+      ENV['simple-auth-cookie-store'] = {
         cookieName: 'my_app_auth_session'
       }
       ```
@@ -37,6 +37,21 @@ define("simple-auth-cookie-store/configuration",
       @module simple-auth/configuration
     */
     __exports__["default"] = {
+
+      /**
+        The domain to use for the cookie, e.g., "example.com", ".example.com"
+        (includes all subdomains) or "subdomain.example.com". If not configured the
+        cookie domain defaults to the domain the session was authneticated on.
+
+        This value can be configured via
+        [`SimpleAuth.Configuration.CookieStore#cookieDomain`](#SimpleAuth-Configuration-CookieStore-cookieDomain).
+
+        @property cookieDomain
+        @type String
+        @default null
+      */
+      cookieDomain: defaults.cookieDomain,
+
       /**
         The name of the cookie the store stores its data in.
 
@@ -144,6 +159,21 @@ define("simple-auth-cookie-store/stores/cookie",
       @extends Stores.Base
     */
     __exports__["default"] = Base.extend({
+
+      /**
+        The domain to use for the cookie, e.g., "example.com", ".example.com"
+        (includes all subdomains) or "subdomain.example.com". If not configured the
+        cookie domain defaults to the domain the session was authneticated on.
+
+        This value can be configured via
+        [`SimpleAuth.Configuration.CookieStore#cookieDomain`](#SimpleAuth-Configuration-CookieStore-cookieDomain).
+
+        @property cookieDomain
+        @type String
+        @default null
+      */
+      cookieDomain: null,
+
       /**
         The name of the cookie the store stores its data in.
 
@@ -189,6 +219,7 @@ define("simple-auth-cookie-store/stores/cookie",
       init: function() {
         this.cookieName           = Configuration.cookieName;
         this.cookieExpirationTime = Configuration.cookieExpirationTime;
+        this.cookieDomain         = Configuration.cookieDomain;
         this.syncData();
       },
 
@@ -247,10 +278,11 @@ define("simple-auth-cookie-store/stores/cookie",
         @private
       */
       write: function(value, expiration) {
-        var path = '; path=/';
+        var path    = '; path=/';
+        var domain  = Ember.isEmpty(this.cookieDomain) ? '' : '; domain=' + this.cookieDomain;
         var expires = Ember.isEmpty(expiration) ? '' : '; expires=' + new Date(expiration).toUTCString();
         var secure  = !!this._secureCookies ? ';secure' : '';
-        document.cookie = this.cookieName + '=' + encodeURIComponent(value) + path + expires + secure;
+        document.cookie = this.cookieName + '=' + encodeURIComponent(value) + domain + path + expires + secure;
       },
 
       /**

@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth', '0.6.7');
+Ember.libraries.register('Ember Simple Auth', '0.7.0');
 
 var define, requireModule;
 
@@ -278,12 +278,11 @@ define("simple-auth/configuration",
     /**
       Ember Simple Auth's configuration object.
 
-      To change any of these values, define a global environment object for Ember
-      Simple Auth and define the values there:
+      To change any of these values, set them on the application's environment
+      object:
 
       ```js
-      window.ENV = window.ENV || {};
-      window.ENV['simple-auth'] = {
+      ENV['simple-auth'] = {
         authenticationRoute: 'sign-in'
       };
       ```
@@ -627,7 +626,9 @@ define("simple-auth/mixins/application-route-mixin",
           @method actions.sessionInvalidationSucceeded
         */
         sessionInvalidationSucceeded: function() {
-          window.location.replace(Configuration.applicationRootUrl);
+          if (!Ember.testing) {
+            window.location.replace(Configuration.applicationRootUrl);
+          }
         },
 
         /**
@@ -1316,12 +1317,11 @@ define("simple-auth/stores/base",
 
       Stores are used to persist the session's state so it survives a page reload
       and is synchronized across multiple tabs or windows of the same application.
-      The store to be used with the application can be configured in the global
-      configuration object:
+      The store to be used with the application can be configured on the
+      application's environment object:
 
       ```js
-      window.ENV = window.ENV || {};
-      window.ENV['simple-auth'] = {
+      ENV['simple-auth'] = {
         store: 'simple-auth-session-store:local-storage'
       }
       ```

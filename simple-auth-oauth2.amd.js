@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth OAuth 2.0', '0.6.7');
+Ember.libraries.register('Ember Simple Auth OAuth 2.0', '0.7.0');
 
 define("simple-auth-oauth2/authenticators/oauth2", 
   ["simple-auth/authenticators/base","./../configuration","exports"],
@@ -37,7 +37,7 @@ define("simple-auth-oauth2/authenticators/oauth2",
         Triggered when the authenticator refreshes the access token (see
         [RFC 6740, section 6](http://tools.ietf.org/html/rfc6749#section-6)).
 
-        @event updated
+        @event sessionDataUpdated
         @param {Object} data The updated session data
       */
 
@@ -345,12 +345,11 @@ define("simple-auth-oauth2/configuration",
     /**
       Ember Simple Auth OAuth2's configuration object.
 
-      To change any of these values, define a global environment object for Ember
-      Simple Auth and define the values there:
+      To change any of these values, set them on the application's environment
+      object:
 
       ```js
-      window.ENV = window.ENV || {};
-      window.ENV['simple-auth-oauth2'] = {
+      ENV['simple-auth-oauth2'] = {
         serverTokenEndpoint: '/some/custom/endpoint'
       }
       ```
