@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth Testing', '0.7.0');
+Ember.libraries.register('Ember Simple Auth Testing', '0.7.1');
 
 define("simple-auth-testing/authenticators/test", 
   ["simple-auth/authenticators/base","exports"],

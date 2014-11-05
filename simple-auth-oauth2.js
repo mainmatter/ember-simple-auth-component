@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth OAuth 2.0', '0.7.0');
+Ember.libraries.register('Ember Simple Auth OAuth 2.0', '0.7.1');
 
 var define, requireModule;
 

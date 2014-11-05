@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth', '0.7.0');
+Ember.libraries.register('Ember Simple Auth', '0.7.1');
 
 define("simple-auth/authenticators/base", 
   ["exports"],
@@ -223,6 +223,7 @@ define("simple-auth/configuration",
       authorizer:                  null,
       session:                     'simple-auth-session:main',
       store:                       'simple-auth-session-store:local-storage',
+      localStorageKey:             'ember_simple_auth:session',
       crossOriginWhitelist:        [],
       applicationRootUrl:          null
     };
@@ -330,6 +331,15 @@ define("simple-auth/configuration",
         @default simple-auth-session-store:local-storage
       */
       store: defaults.store,
+
+      /**
+        The key the store stores the data in.
+
+        @property key
+        @type String
+        @default 'ember_simple_auth:session'
+      */
+      localStorageKey: defaults.localStorageKey,
 
       /**
         Ember Simple Auth will never authorize requests going to a different origin
@@ -1394,12 +1404,12 @@ define("simple-auth/stores/ephemeral",
     });
   });
 define("simple-auth/stores/local-storage", 
-  ["./base","../utils/objects-are-equal","simple-auth/utils/get-global-config","exports"],
+  ["./base","../utils/objects-are-equal","../configuration","exports"],
   function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
     "use strict";
     var Base = __dependency1__["default"];
     var objectsAreEqual = __dependency2__["default"];
-    var getGlobalConfig = __dependency3__["default"];
+    var Configuration = __dependency3__["default"];
 
     /**
       Store that saves its data in the browser's `localStorage`.
@@ -1429,8 +1439,7 @@ define("simple-auth/stores/local-storage",
         @private
       */
       init: function() {
-        var globalConfig = getGlobalConfig('simple-auth');
-        this.key         = globalConfig.localStorageKey || this.key;
+        this.key = Configuration.localStorageKey;
 
         this.bindToStorageEvents();
       },

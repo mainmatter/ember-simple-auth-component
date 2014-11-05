@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth Testing', '0.7.0');
+Ember.libraries.register('Ember Simple Auth Testing', '0.7.1');
 
 var define, requireModule;
 
