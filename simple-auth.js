@@ -1268,7 +1268,7 @@ define("simple-auth/setup",
     function ajaxPrefilter(options, originalOptions, jqXHR) {
       if (shouldAuthorizeRequest(options)) {
         jqXHR.__simple_auth_authorized__ = true;
-        ajaxPrefilter.authorize(jqXHR, options);
+        ajaxPrefilter.authorizer.authorize(jqXHR, options);
       }
     }
 
