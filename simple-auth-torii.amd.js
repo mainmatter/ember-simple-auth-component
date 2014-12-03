@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth Torii', '0.7.1');
+Ember.libraries.register('Ember Simple Auth Torii', '0.7.2');
 
 define("simple-auth-torii/authenticators/torii", 
   ["simple-auth/authenticators/base","exports"],
@@ -72,12 +72,13 @@ define("simple-auth-torii/authenticators/torii",
 
         @method authenticate
         @param {String} provider The provider to authenticate the session with
+        @param {Object} options The options to pass to the torii provider
         @return {Ember.RSVP.Promise} A promise that resolves when the provider successfully authenticates a user and rejects otherwise
       */
-      authenticate: function(provider) {
+      authenticate: function(provider, options) {
         var _this = this;
         return new Ember.RSVP.Promise(function(resolve, reject) {
-          _this.torii.open(provider).then(function(data) {
+          _this.torii.open(provider, options || {}).then(function(data) {
             _this.resolveWith(provider, data, resolve);
           }, reject);
         });
