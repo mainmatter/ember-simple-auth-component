@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth Testing', '0.7.2');
+Ember.libraries.register('Ember Simple Auth Testing', '0.7.3');
 
 define("simple-auth-testing/authenticators/test", 
   ["simple-auth/authenticators/base","exports"],
@@ -16,15 +16,15 @@ define("simple-auth-testing/authenticators/test",
 
     __exports__["default"] = Base.extend({
       restore: function(data) {
-        return new Ember.RSVP.resolve();
+        return Ember.RSVP.resolve();
       },
 
       authenticate: function(options) {
-        return new Ember.RSVP.resolve();
+        return Ember.RSVP.resolve();
       },
 
       invalidate: function(data) {
-        return new Ember.RSVP.resolve();
+        return Ember.RSVP.resolve();
       }
     });
   });

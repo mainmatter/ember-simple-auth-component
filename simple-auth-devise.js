@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth Devise', '0.7.2');
+Ember.libraries.register('Ember Simple Auth Devise', '0.7.3');
 
 var define, requireModule;
 
@@ -114,9 +114,9 @@ define("simple-auth-devise/authenticators/devise",
 
         @property tokenAttributeName
         @type String
-        @default 'user_token'
+        @default 'token'
       */
-      tokenAttributeName: 'user_token',
+      tokenAttributeName: 'token',
 
       /**
         The identification attribute name.
@@ -143,7 +143,7 @@ define("simple-auth-devise/authenticators/devise",
 
       /**
         Restores the session from a set of session properties; __will return a
-        resolving promise when there's a non-empty `user_token` and a non-empty
+        resolving promise when there's a non-empty `token` and a non-empty
         `user_email` in the `properties`__ and a rejecting promise otherwise.
 
         @method restore
@@ -180,9 +180,10 @@ define("simple-auth-devise/authenticators/devise",
         return new Ember.RSVP.Promise(function(resolve, reject) {
           var data                 = {};
           data[_this.resourceName] = {
-            email:    credentials.identification,
             password: credentials.password
           };
+          data[_this.resourceName][_this.identificationAttributeName] = credentials.identification;
+
           _this.makeRequest(data).then(function(response) {
             Ember.run(function() {
               resolve(response);
@@ -231,8 +232,8 @@ define("simple-auth-devise/authorizers/devise",
 
     /**
       Authenticator that works with the Ruby gem
-      [Devise](https://github.com/plataformatec/devise) by sending the `user_token`
-      and `user_email` properties from the session in the `Authorization` header.
+      [Devise](https://github.com/plataformatec/devise) by sending the `token` and
+      `user_email` properties from the session in the `Authorization` header.
 
       __As token authentication is not actually part of devise anymore, the server
       needs to implement some customizations__ to work with this authenticator -
@@ -255,9 +256,9 @@ define("simple-auth-devise/authorizers/devise",
 
         @property tokenAttributeName
         @type String
-        @default 'user_token'
+        @default 'token'
       */
-      tokenAttributeName: 'user_token',
+      tokenAttributeName: 'token',
 
       /**
         The identification attribute name.
@@ -272,7 +273,7 @@ define("simple-auth-devise/authorizers/devise",
       identificationAttributeName: 'user_email',
 
       /**
-        Authorizes an XHR request by sending the `user_token` and `user_email`
+        Authorizes an XHR request by sending the `token` and `user_email`
         properties from the session in the `Authorization` header:
 
         ```
@@ -312,7 +313,7 @@ define("simple-auth-devise/configuration",
     var defaults = {
       serverTokenEndpoint:         '/users/sign_in',
       resourceName:                'user',
-      tokenAttributeName:          'user_token',
+      tokenAttributeName:          'token',
       identificationAttributeName: 'user_email'
     };
 
@@ -363,12 +364,16 @@ define("simple-auth-devise/configuration",
         @readOnly
         @static
         @type String
-        @default 'user_token'
+        @default 'token'
       */
       tokenAttributeName: defaults.tokenAttributeName,
 
       /**
-        The email attribute name.
+        The identification attribute name. This is the parameter that is sent to
+        [serverTokenEndpoint](#SimpleAuth-Configuration-Devise-serverTokenEndpoint)
+        during the authentication process, is expected in the response and is used
+        by the
+        [Devise authorizer](#SimpleAuth-Authorizers-Devise).
 
         @property identificationAttributeName
         @readOnly

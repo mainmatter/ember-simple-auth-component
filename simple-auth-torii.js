@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth Torii', '0.7.2');
+Ember.libraries.register('Ember Simple Auth Torii', '0.7.3');
 
 var define, requireModule;
 

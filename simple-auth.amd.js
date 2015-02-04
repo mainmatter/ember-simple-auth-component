@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth', '0.7.2');
+Ember.libraries.register('Ember Simple Auth', '0.7.3');
 
 define("simple-auth/authenticators/base", 
   ["exports"],
@@ -109,7 +109,7 @@ define("simple-auth/authenticators/base",
         @return {Ember.RSVP.Promise} A promise that when it resolves results in the session being authenticated
       */
       restore: function(data) {
-        return new Ember.RSVP.reject();
+        return Ember.RSVP.reject();
       },
 
       /**
@@ -133,7 +133,7 @@ define("simple-auth/authenticators/base",
         @return {Ember.RSVP.Promise} A promise that when it resolves results in the session being authenticated
       */
       authenticate: function(options) {
-        return new Ember.RSVP.reject();
+        return Ember.RSVP.reject();
       },
 
       /**
@@ -155,7 +155,7 @@ define("simple-auth/authenticators/base",
         @return {Ember.RSVP.Promise} A promise that when it resolves results in the session being invalidated
       */
       invalidate: function(data) {
-        return new Ember.RSVP.resolve();
+        return Ember.RSVP.resolve();
       }
     });
   });
@@ -348,7 +348,9 @@ define("simple-auth/configuration",
         this setting. _Beware that origins consist of protocol, host and port (port
         can be left out when it is 80 for HTTP or 443 for HTTPS)_, e.g.
         `http://domain.com:1234`, `https://external.net`. You can also whitelist
-        all external origins by specifying `[*]`.
+        all subdomains for a specific domain using wildcard expressions e.g.
+        `http://*.domain.com:1234`, `https://*.external.net` or whitelist all
+        external origins by specifying `[*]`.
 
         @property crossOriginWhitelist
         @readOnly
@@ -1196,10 +1198,15 @@ define("simple-auth/setup",
     var LocalStorage = __dependency3__["default"];
     var Ephemeral = __dependency4__["default"];
 
+    var wildcardToken = '_wildcard_token_';
+
     function extractLocationOrigin(location) {
       if (location === '*'){
           return location;
       }
+
+      location = location.replace('*', wildcardToken);
+
       if (Ember.typeOf(location) === 'string') {
         var link = document.createElement('a');
         link.href = location;
@@ -1217,14 +1224,26 @@ define("simple-auth/setup",
       return location.protocol + '//' + location.hostname + (port !== '' ? ':' + port : '');
     }
 
+    function matchDomain(urlOrigin){
+      return function(domain) {
+        if (domain.indexOf(wildcardToken) > -1) {
+          var domainRegex = new RegExp(domain.replace(wildcardToken , '.+'));
+          return urlOrigin.match(domainRegex);
+        }
+
+        return domain.indexOf(urlOrigin) > -1;
+      };
+    }
+
     var urlOrigins     = {};
     var crossOriginWhitelist;
     function shouldAuthorizeRequest(options) {
       if (options.crossDomain === false || crossOriginWhitelist.indexOf('*') > -1) {
         return true;
       }
+
       var urlOrigin = urlOrigins[options.url] = urlOrigins[options.url] || extractLocationOrigin(options.url);
-      return crossOriginWhitelist.indexOf(urlOrigin) > -1;
+      return Ember.A(crossOriginWhitelist).any(matchDomain(urlOrigin));
     }
 
     function registerFactories(container) {
