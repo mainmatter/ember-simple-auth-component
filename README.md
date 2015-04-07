@@ -6,7 +6,7 @@ This is a shim repository that keeps the Ember Simple Auth component for
 ```js
 {
   "dependencies": {
-    "ember-simple-auth": "0.7.3"
+    "ember-simple-auth": "0.8.0-beta.1"
   }
 }
 ```

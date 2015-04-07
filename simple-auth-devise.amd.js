@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth Devise', '0.7.3');
+Ember.libraries.register('Ember Simple Auth Devise', '0.8.0-beta.1');
 
 define("simple-auth-devise/authenticators/devise", 
   ["simple-auth/authenticators/base","./../configuration","exports"],
@@ -78,9 +78,9 @@ define("simple-auth-devise/authenticators/devise",
 
         @property identificationAttributeName
         @type String
-        @default 'user_email'
+        @default 'email'
       */
-      identificationAttributeName: 'user_email',
+      identificationAttributeName: 'email',
 
       /**
         @method init
@@ -96,7 +96,7 @@ define("simple-auth-devise/authenticators/devise",
       /**
         Restores the session from a set of session properties; __will return a
         resolving promise when there's a non-empty `token` and a non-empty
-        `user_email` in the `properties`__ and a rejecting promise otherwise.
+        `email` in the `properties`__ and a rejecting promise otherwise.
 
         @method restore
         @param {Object} properties The properties to restore the session from
@@ -183,9 +183,9 @@ define("simple-auth-devise/authorizers/devise",
     var Configuration = __dependency2__["default"];
 
     /**
-      Authenticator that works with the Ruby gem
+      Authorizer that works with the Ruby gem
       [Devise](https://github.com/plataformatec/devise) by sending the `token` and
-      `user_email` properties from the session in the `Authorization` header.
+      `email` properties from the session in the `Authorization` header.
 
       __As token authentication is not actually part of devise anymore, the server
       needs to implement some customizations__ to work with this authenticator -
@@ -220,12 +220,12 @@ define("simple-auth-devise/authorizers/devise",
 
         @property identificationAttributeName
         @type String
-        @default 'user_email'
+        @default 'email'
       */
-      identificationAttributeName: 'user_email',
+      identificationAttributeName: 'email',
 
       /**
-        Authorizes an XHR request by sending the `token` and `user_email`
+        Authorizes an XHR request by sending the `token` and `email`
         properties from the session in the `Authorization` header:
 
         ```
@@ -247,8 +247,9 @@ define("simple-auth-devise/authorizers/devise",
       },
 
       authorize: function(jqXHR, requestOptions) {
-        var userToken          = this.get('session').get(this.tokenAttributeName);
-        var userIdentification = this.get('session').get(this.identificationAttributeName);
+        var secureData         = this.get('session.secure');
+        var userToken          = secureData[this.tokenAttributeName];
+        var userIdentification = secureData[this.identificationAttributeName];
         if (this.get('session.isAuthenticated') && !Ember.isEmpty(userToken) && !Ember.isEmpty(userIdentification)) {
           var authData = this.tokenAttributeName + '="' + userToken + '", ' + this.identificationAttributeName + '="' + userIdentification + '"';
           jqXHR.setRequestHeader('Authorization', 'Token ' + authData);
@@ -266,7 +267,7 @@ define("simple-auth-devise/configuration",
       serverTokenEndpoint:         '/users/sign_in',
       resourceName:                'user',
       tokenAttributeName:          'token',
-      identificationAttributeName: 'user_email'
+      identificationAttributeName: 'email'
     };
 
     /**
@@ -331,7 +332,7 @@ define("simple-auth-devise/configuration",
         @readOnly
         @static
         @type String
-        @default 'user_email'
+        @default 'email'
       */
       identificationAttributeName: defaults.identificationAttributeName,
 

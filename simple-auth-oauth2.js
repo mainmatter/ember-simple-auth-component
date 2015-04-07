@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth OAuth 2.0', '0.7.3');
+Ember.libraries.register('Ember Simple Auth OAuth 2.0', '0.8.0-beta.1');
 
 var define, requireModule;
 
@@ -380,7 +380,7 @@ define("simple-auth-oauth2/authorizers/oauth2",
         @param {Object} requestOptions The options as provided to the `$.ajax` method (see http://api.jquery.com/jQuery.ajaxPrefilter/)
       */
       authorize: function(jqXHR, requestOptions) {
-        var accessToken = this.get('session.access_token');
+        var accessToken = this.get('session.secure.access_token');
         if (this.get('session.isAuthenticated') && !Ember.isEmpty(accessToken)) {
           jqXHR.setRequestHeader('Authorization', 'Bearer ' + accessToken);
         }
