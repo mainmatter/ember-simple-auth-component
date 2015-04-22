@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth Torii', '0.8.0-beta.1');
+Ember.libraries.register('Ember Simple Auth Torii', '0.8.0-beta.2');
 
 define("simple-auth-torii/authenticators/torii", 
   ["simple-auth/authenticators/base","exports"],
@@ -136,7 +136,7 @@ define("simple-auth-torii/initializer",
       initialize: function(container, application) {
         var torii         = container.lookup('torii:main');
         var authenticator = Authenticator.create({ torii: torii });
-        container.register('simple-auth-authenticator:torii', authenticator, { instantiate: false });
+        application.register('simple-auth-authenticator:torii', authenticator, { instantiate: false });
       }
     };
   });

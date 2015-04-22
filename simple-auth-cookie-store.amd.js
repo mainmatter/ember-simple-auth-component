@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth Cookie Store', '0.8.0-beta.1');
+Ember.libraries.register('Ember Simple Auth Cookie Store', '0.8.0-beta.2');
 
 define("simple-auth-cookie-store/configuration", 
   ["simple-auth/utils/load-config","exports"],
@@ -107,7 +107,7 @@ define("simple-auth-cookie-store/initializer",
       initialize: function(container, application) {
         var config = getGlobalConfig('simple-auth-cookie-store');
         Configuration.load(container, config);
-        container.register('simple-auth-session-store:cookie', Store);
+        application.register('simple-auth-session-store:cookie', Store);
       }
     };
   });

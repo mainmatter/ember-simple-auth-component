@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth', '0.8.0-beta.1');
+Ember.libraries.register('Ember Simple Auth', '0.8.0-beta.2');
 
 var define, requireModule;
 
@@ -92,7 +92,7 @@ define("simple-auth/authenticators/base",
       Ember.Application.initializer({
         name: 'authentication',
         initialize: function(container, application) {
-          container.register('authenticator:custom', CustomAuthenticator);
+          application.register('authenticator:custom', CustomAuthenticator);
         }
       });
       ```
@@ -1117,7 +1117,7 @@ define("simple-auth/session",
         var _this = this;
         return new Ember.RSVP.Promise(function(resolve, reject) {
           var authenticator = _this.container.lookup(_this.authenticator);
-          authenticator.invalidate(_this.content).then(function() {
+          authenticator.invalidate(_this.content.secure).then(function() {
             authenticator.off('sessionDataUpdated');
             _this.clear(true);
             resolve();
@@ -1314,10 +1314,10 @@ define("simple-auth/setup",
       return Ember.A(crossOriginWhitelist).any(matchDomain(urlOrigin));
     }
 
-    function registerFactories(container) {
-      container.register('simple-auth-session-store:local-storage', LocalStorage);
-      container.register('simple-auth-session-store:ephemeral', Ephemeral);
-      container.register('simple-auth-session:main', Session);
+    function registerFactories(application) {
+      application.register('simple-auth-session-store:local-storage', LocalStorage);
+      application.register('simple-auth-session-store:ephemeral', Ephemeral);
+      application.register('simple-auth-session:main', Session);
     }
 
     function ajaxPrefilter(options, originalOptions, jqXHR) {
@@ -1341,13 +1341,13 @@ define("simple-auth/setup",
     **/
     __exports__["default"] = function(container, application) {
       application.deferReadiness();
-      registerFactories(container);
+      registerFactories(application);
 
       var store   = container.lookup(Configuration.store);
       var session = container.lookup(Configuration.session);
       session.setProperties({ store: store, container: container });
       Ember.A(['controller', 'route', 'component']).forEach(function(component) {
-        container.injection(component, Configuration.sessionPropertyName, Configuration.session);
+        application.inject(component, Configuration.sessionPropertyName, Configuration.session);
       });
 
       crossOriginWhitelist = Ember.A(Configuration.crossOriginWhitelist).map(function(origin) {
@@ -1637,48 +1637,60 @@ define("simple-auth/utils/objects-are-equal",
   function(__exports__) {
     "use strict";
     /**
+      This was taken from http://stackoverflow.com/questions/1068834/object-comparison-in-javascript#1144249
+
       @method objectsAreEqual
       @private
     */
-    function objectsAreEqual(a, b) {
-      if (a === b) {
+    __exports__["default"] = function objectsAreEqual(a, b) {
+      function compare(x, y) {
+        var property;
+        if (isNaN(x) && isNaN(y) && typeof x === 'number' && typeof y === 'number') {
+          return true;
+        }
+
+        if (x === y) {
+          return true;
+        }
+
+        if (!(x instanceof Object && y instanceof Object)) {
+          return false;
+        }
+
+        for (property in y) {
+          if (y.hasOwnProperty(property) !== x.hasOwnProperty(property)) {
+            return false;
+          } else if (typeof y[property] !== typeof x[property]) {
+            return false;
+          }
+        }
+
+        for (property in x) {
+          if (y.hasOwnProperty(property) !== x.hasOwnProperty(property)) {
+            return false;
+          } else if (typeof y[property] !== typeof x[property]) {
+            return false;
+          }
+
+          switch (typeof (x[property])) {
+            case 'object':
+              if (!compare(x[property], y[property])) {
+                return false;
+              }
+              break;
+            default:
+              if (x[property] !== y[property]) {
+                return false;
+              }
+              break;
+          }
+        }
+
         return true;
       }
-      if (!(a instanceof Object) || !(b instanceof Object)) {
-        return false;
-      }
-      if(a.constructor !== b.constructor) {
-        return false;
-      }
 
-      for (var property in a) {
-        if (!a.hasOwnProperty(property)) {
-          continue;
-        }
-        if (!b.hasOwnProperty(property)) {
-          return false;
-        }
-        if (a[property] === b[property]) {
-          continue;
-        }
-        if (Ember.typeOf(a[property]) !== 'object') {
-          return false;
-        }
-        if (!objectsAreEqual(a[property], b[property])) {
-          return false;
-        }
-      }
-
-      for (property in b) {
-        if (b.hasOwnProperty(property) && !a.hasOwnProperty(property)) {
-          return false;
-        }
-      }
-
-      return true;
+      return compare(a, b);
     }
-
-    __exports__["default"] = objectsAreEqual;
   });
 var initializer                   = requireModule('simple-auth/initializer')['default'];
 var Configuration                 = requireModule('simple-auth/configuration')['default'];

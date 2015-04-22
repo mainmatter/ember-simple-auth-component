@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth OAuth 2.0', '0.8.0-beta.1');
+Ember.libraries.register('Ember Simple Auth OAuth 2.0', '0.8.0-beta.2');
 
 var define, requireModule;
 
@@ -245,20 +245,21 @@ define("simple-auth-oauth2/authenticators/oauth2",
           resolve();
         }
         return new Ember.RSVP.Promise(function(resolve, reject) {
-          if (!Ember.isEmpty(_this.serverTokenRevocationEndpoint)) {
+          if (Ember.isEmpty(_this.serverTokenRevocationEndpoint)) {
+            success(resolve);
+          } else {
             var requests = [];
             Ember.A(['access_token', 'refresh_token']).forEach(function(tokenType) {
-              if (!Ember.isEmpty(data[tokenType])) {
+              var token = data[tokenType];
+              if (!Ember.isEmpty(token)) {
                 requests.push(_this.makeRequest(_this.serverTokenRevocationEndpoint, {
-                  token_type_hint: tokenType, token: data[tokenType]
+                  token_type_hint: tokenType, token: token
                 }));
               }
             });
             Ember.$.when.apply(Ember.$, requests).always(function(responses) {
               success(resolve);
             });
-          } else {
-            success(resolve);
           }
         });
       },
@@ -483,8 +484,8 @@ define("simple-auth-oauth2/initializer",
       initialize: function(container, application) {
         var config = getGlobalConfig('simple-auth-oauth2');
         Configuration.load(container, config);
-        container.register('simple-auth-authorizer:oauth2-bearer', Authorizer);
-        container.register('simple-auth-authenticator:oauth2-password-grant', Authenticator);
+        application.register('simple-auth-authorizer:oauth2-bearer', Authorizer);
+        application.register('simple-auth-authenticator:oauth2-password-grant', Authenticator);
       }
     };
   });

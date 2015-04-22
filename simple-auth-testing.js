@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth Testing', '0.8.0-beta.1');
+Ember.libraries.register('Ember Simple Auth Testing', '0.8.0-beta.2');
 
 var define, requireModule;
 
@@ -96,7 +96,7 @@ define("simple-auth-testing/initializer",
       name:       'simple-auth-testing',
       before:     'simple-auth',
       initialize: function(container, application) {
-        container.register('simple-auth-authenticator:test', TestAuthenticator);
+        application.register('simple-auth-authenticator:test', TestAuthenticator);
       }
     };
   });
@@ -106,7 +106,7 @@ define("simple-auth-testing/test-helpers",
     "use strict";
     var Configuration = __dependency1__["default"];
 
-    var testHelpers = function() {
+    __exports__["default"] = function() {
       Ember.Test.registerAsyncHelper('authenticateSession', function(app) {
         var session = app.__container__.lookup(Configuration.session);
         session.authenticate('simple-auth-authenticator:test');
@@ -125,9 +125,7 @@ define("simple-auth-testing/test-helpers",
         }
         return wait();
       });
-    }();
-
-    __exports__["default"] = testHelpers;
+    }
   });
 define('simple-auth/authenticators/base',  ['exports'], function(__exports__) {
   __exports__['default'] = global.SimpleAuth.Authenticators.Base;

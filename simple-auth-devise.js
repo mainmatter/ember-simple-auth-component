@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth Devise', '0.8.0-beta.1');
+Ember.libraries.register('Ember Simple Auth Devise', '0.8.0-beta.2');
 
 var define, requireModule;
 
@@ -416,8 +416,8 @@ define("simple-auth-devise/initializer",
       initialize: function(container, application) {
         var config = getGlobalConfig('simple-auth-devise');
         Configuration.load(container, config);
-        container.register('simple-auth-authorizer:devise', Authorizer);
-        container.register('simple-auth-authenticator:devise', Authenticator);
+        application.register('simple-auth-authorizer:devise', Authorizer);
+        application.register('simple-auth-authenticator:devise', Authenticator);
       }
     };
   });
