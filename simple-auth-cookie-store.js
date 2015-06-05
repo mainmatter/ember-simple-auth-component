@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth Cookie Store', '0.8.0-beta.2');
+Ember.libraries.register('Ember Simple Auth Cookie Store', '0.8.0-beta.3');
 
 var define, requireModule;
 
