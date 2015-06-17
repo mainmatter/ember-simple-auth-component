@@ -6,7 +6,7 @@
     Ember = require('ember');
   }
 
-Ember.libraries.register('Ember Simple Auth OAuth 2.0', '0.8.0-beta.3');
+Ember.libraries.register('Ember Simple Auth OAuth 2.0', '0.8.0');
 
 define("simple-auth-oauth2/authenticators/oauth2", 
   ["simple-auth/authenticators/base","./../configuration","exports"],

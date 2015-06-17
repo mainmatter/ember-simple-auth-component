@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth Devise', '0.8.0-beta.3');
+Ember.libraries.register('Ember Simple Auth Devise', '0.8.0');
 
 var define, requireModule;
 

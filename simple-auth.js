@@ -1,6 +1,6 @@
 (function(global) {
 
-Ember.libraries.register('Ember Simple Auth', '0.8.0-beta.3');
+Ember.libraries.register('Ember Simple Auth', '0.8.0');
 
 var define, requireModule;
 
@@ -1059,7 +1059,18 @@ define("simple-auth/session",
         @property content
         @private
       */
-      content: { secure: {} },
+      content: null,
+
+      /**
+        Initializes the content object so references aren't shared across
+        instances.
+
+        @method initializeContent
+        @private
+      */
+      initializeContent: Ember.on('init', function() {
+        this.set('content', { secure: {} });
+      }),
 
       /**
         Authenticates the session with an `authenticator` and appropriate
